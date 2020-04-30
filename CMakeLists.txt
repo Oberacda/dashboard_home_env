@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
-project(home_env_iot_desktop)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+project(home_env_iot_dashboard
+        VERSION 1.0.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -12,49 +18,19 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 find_package(Qt5 COMPONENTS Widgets Charts REQUIRED)
-
 find_package(cpprestsdk REQUIRED)
 
-add_executable(home_env_iot_desktop main.cpp)
-target_link_libraries(home_env_iot_desktop
-        PRIVATE
-        cpprestsdk::cpprest
-        Qt5::Core
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::Charts
-        )
 get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
-if (WIN32)
+set(home_env_iot_dashboard_RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+set(home_env_iot_dashboard_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
-    add_custom_command(TARGET home_env_iot_desktop POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E
-            env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
-            --verbose 0
-            --no-compiler-runtime
-            \"$<TARGET_FILE:home_env_iot_desktop>\"
-            COMMENT "Deploying Qt..."
-            )
+include_directories(${home_env_iot_dashboard_SOURCE_DIR})
+add_subdirectory(${home_env_iot_dashboard_SOURCE_DIR})
 
-endif(WIN32)
-if(APPLE)
 
-    set_target_properties(home_env_iot_desktop
-            PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/MacOSXBundleInfo.plist.in
-    )
-    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-    add_custom_command(TARGET home_env_iot_desktop POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E
-            env PATH="${_qt_bin_dir}" "${MACDEPLOYQT_EXECUTABLE}"
-            \"$<TARGET_FILE_DIR:home_env_iot_desktop>\"
-            -verbose=0
-            -always-overwrite
-            COMMENT "Deploying Qt..."
-            )
-endif(APPLE)
+
+
+
 
